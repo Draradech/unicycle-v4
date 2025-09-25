@@ -24,6 +24,7 @@ typedef struct
 {
   xyzFloat acc;
   xyzFloat gyro;
+  xyzFloat gyroFilt;
   xyzFloat magnet;
   float pitchAngleAcc;
   float rollAngleAcc;
@@ -45,6 +46,7 @@ typedef struct
 typedef struct
 {
   xyzFloat gyroOffset;
+  xyzFloat gyroFilter;
   float pPartSpeedPitch;
   float iPartSpeedPitch;
   float pPartPitch;

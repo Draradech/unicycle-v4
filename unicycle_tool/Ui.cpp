@@ -190,6 +190,7 @@ void CUi::keyDown(char key)
             case 's': inVec.a = -127; break;
             case 'a': inVec.b = 127; break;
             case 'd': inVec.b = -127; break;
+            case 'f': inVec.c = 1; break;
         }
         sendPacket('a', *((int*)&inVec));
     }
@@ -208,6 +209,7 @@ void CUi::keyUp(char key)
             case 's': inVec.a = 0; break;
             case 'a': inVec.b = 0; break;
             case 'd': inVec.b = 0; break;
+            case 'f': inVec.c = 0; break;
         }
         sendPacket('a', *((int*)&inVec));
     }

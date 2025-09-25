@@ -8,20 +8,28 @@ void setupControl()
   controlPara.pPartPitch = 10.0f;
   controlPara.dPartPitch = -0.1f;
 
-  controlPara.speedRollFilter = 100.0f;
-  controlPara.pPartSpeedRoll = 2.0f;
-  controlPara.iPartSpeedRoll = 0.3f;
+  controlPara.speedRollFilter = 200.0f;
+  controlPara.pPartSpeedRoll = 5.0f;
+  controlPara.iPartSpeedRoll = 0.5f;
   controlPara.pPartRoll = 10.0f;
   controlPara.dPartRoll = 0.15f;
 
-  controlPara.dPartYaw = 0.05f;
+  controlPara.dPartYaw = 0.15f;
 
   controlState.activePitch = false;
   controlState.activeRoll = false;
+
+  controlPara.gyroFilter.x = 50.0f;
+  controlPara.gyroFilter.y = 50.0f;
+  controlPara.gyroFilter.z = 30.0f;
 }
 
 void loopControl()
 {
+  sensorData.gyroFilt.x = PT1(sensorData.gyro.x, sensorData.gyroFilt.x, controlPara.gyroFilter.x);
+  sensorData.gyroFilt.y = PT1(sensorData.gyro.y, sensorData.gyroFilt.y, controlPara.gyroFilter.y);
+  sensorData.gyroFilt.z = PT1(sensorData.gyro.z, sensorData.gyroFilt.z, controlPara.gyroFilter.z);
+
   float targetSpeedPitch = 0;
   if(joystickTimeout) targetSpeedPitch += (joystickReport.y  / 127.0f - 1.0f) * -5.0f;
   targetSpeedPitch += (input.a  / 127.0f) * 5.0f;
@@ -33,7 +41,8 @@ void loopControl()
   speedDev = controlState.targetSpeedPitch - controlState.speedPitchFilt;
   controlState.targetPitch = controlState.targetPitchI - speedDev * controlPara.pPartSpeedPitch;
   float pitchDev = controlPara.pitchWP + controlState.targetPitch - sensorData.pitchAngle;
-  actuator.torque[0] = pitchDev * controlPara.pPartPitch - sensorData.gyro.z * controlPara.dPartPitch;
+  actuator.torque[0] = pitchDev * controlPara.pPartPitch - sensorData.gyroFilt.z * controlPara.dPartPitch;
+  if(input.c) actuator.torque[0] = pitchDev * 1.0f - sensorData.gyroFilt.z * controlPara.dPartPitch;
   if(fabs(sensorData.rollAngle) < 10.0f && fabs(actuator.torque[0]) < 2.0f) controlState.activePitch = true;
 
   controlState.targetSpeedRoll = 0;
@@ -43,7 +52,7 @@ void loopControl()
   speedDev = controlState.targetSpeedRoll - controlState.speedRollFilt;
   controlState.targetRoll = controlState.targetRollI - speedDev * controlPara.pPartSpeedRoll * 0.01f;
   float rollDev = controlPara.rollWP + controlState.targetRoll - sensorData.rollAngle;
-  float targetTorqueRoll = rollDev * controlPara.pPartRoll - sensorData.gyro.y * controlPara.dPartRoll;
+  float targetTorqueRoll = rollDev * controlPara.pPartRoll - sensorData.gyroFilt.y * controlPara.dPartRoll;
   actuator.torque[1] = targetTorqueRoll;
   actuator.torque[2] = -targetTorqueRoll;
   if(controlState.activePitch && fabs(targetTorqueRoll) < 1.0f) controlState.activeRoll = true;
@@ -63,14 +72,14 @@ void loopControl()
 
   for (int i = 0; i < 3; i++) actuator.torque[i] = LIMIT(actuator.torque[i], -40.0f, 40.0f);
 
-  if (!actuator.disabled && controlState.activePitch)
+  if (!actuator.disabled && (controlState.activePitch || input.c))
   {
     sendTorque(0, actuator.torque[0]);
   } else {
     sendTorque(0, 0);
   }
 
-  if (!actuator.disabled && controlState.activeRoll)
+  if (!actuator.disabled && (controlState.activeRoll || input.c))
   {
     sendTorque(1, actuator.torque[1]);
     sendTorque(2, actuator.torque[2]);

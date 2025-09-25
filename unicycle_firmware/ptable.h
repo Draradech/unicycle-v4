@@ -16,5 +16,9 @@ ENTRY('e',  controlPara.dPartYaw,        0.01,       "",    "d part yaw"        
 ENTRY('r',  controlPara.gyroOffset.x,    0.01,  "deg/s",    "gyro offset x"                   )
 ENTRY('t',  controlPara.gyroOffset.y,    0.01,  "deg/s",    "gyro offset y"                   )
 ENTRY('z',  controlPara.gyroOffset.z,    0.01,  "deg/s",    "gyro offset z"                   )
+ENTRY('u',  controlPara.gyroFilter.x,     1.0,     "ms",    "gyro filter x"                   )
+ENTRY('i',  controlPara.gyroFilter.y,     1.0,     "ms",    "gyro filter y"                   )
+ENTRY('o',  controlPara.gyroFilter.z,     1.0,     "ms",    "gyro filter z"                   )
+ENTRY('p',  controlState.activePitch,     1.0,       "",    "pitch controller active"         )
 
 ENTRY(  0,  controlPara.dPartPitch,      0.01,       "",    "end of table"                    )
