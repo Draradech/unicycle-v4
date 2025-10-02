@@ -67,12 +67,15 @@ int main(int argc, char** argv)
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
 
     glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
-
+    
+    printf("create window: ");
     glutCreateWindow("yabr measurement tool");
     //glutFullScreen();
+    printf("done.\n");
 
     glutIgnoreKeyRepeat(true);
 
+    printf("set callbacks: ");
     glutDisplayFunc(display);
     glutIdleFunc(idle);
     glutReshapeFunc(reshape);
@@ -80,10 +83,13 @@ int main(int argc, char** argv)
     glutKeyboardUpFunc(keyboardUp);
     glutMouseFunc(mouse);
     glutPassiveMotionFunc(passiveMotion);
+    printf("done.\n");
 
     pTool->getUi()->sendPacket('m', 0);
 
+    printf("enter main loop.\n");
     glutMainLoop();
+    printf("main loop ended.\n");
 
     delete pTool;
 

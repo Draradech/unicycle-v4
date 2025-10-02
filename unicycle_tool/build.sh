@@ -1,2 +1,2 @@
 #!/bin/sh
-g++ -O3 -o tool_pc *.cpp -lglut -lGL
+g++ -O3 -g -o tool_pc *.cpp -lglut -lGL

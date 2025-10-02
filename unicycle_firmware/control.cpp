@@ -1,18 +1,27 @@
 #include "stdinc.h"
 
+float ramp(float from, float to, float gradient)
+{
+  if (to > from)
+  {
+    return from + gradient > to ? to : from + gradient;
+  }
+  return from - gradient < to ? to : from - gradient;
+}
+
 void setupControl()
 {
   controlPara.speedPitchFilter = 100.0f;
   controlPara.pPartSpeedPitch = 1.0f;
   controlPara.iPartSpeedPitch = 1.0f;
   controlPara.pPartPitch = 10.0f;
-  controlPara.dPartPitch = -0.1f;
+  controlPara.dPartPitch = -0.15f;
 
   controlPara.speedRollFilter = 200.0f;
   controlPara.pPartSpeedRoll = 5.0f;
   controlPara.iPartSpeedRoll = 0.5f;
   controlPara.pPartRoll = 10.0f;
-  controlPara.dPartRoll = 0.15f;
+  controlPara.dPartRoll = 0.30f;
 
   controlPara.dPartYaw = 0.15f;
 
@@ -26,23 +35,28 @@ void setupControl()
 
 void loopControl()
 {
+  float maxvel = MAX(fabs(sensorData.wheelVel[1]), fabs(sensorData.wheelVel[2]));
+  float inputDamp = 2.0f - maxvel / 20.0f;
+  inputDamp = LIMIT(inputDamp, 0.0f, 1.0f);
   sensorData.gyroFilt.x = PT1(sensorData.gyro.x, sensorData.gyroFilt.x, controlPara.gyroFilter.x);
   sensorData.gyroFilt.y = PT1(sensorData.gyro.y, sensorData.gyroFilt.y, controlPara.gyroFilter.y);
   sensorData.gyroFilt.z = PT1(sensorData.gyro.z, sensorData.gyroFilt.z, controlPara.gyroFilter.z);
 
   float targetSpeedPitch = 0;
+  static float effectivePPitch = controlPara.pPartPitch;
+  effectivePPitch = ramp(effectivePPitch, controlPara.pPartPitch, 0.05f);
+  if(input.c || BUTTON(3)) effectivePPitch = 1.0f;
   if(joystickTimeout) targetSpeedPitch += (joystickReport.y  / 127.0f - 1.0f) * -5.0f;
   targetSpeedPitch += (input.a  / 127.0f) * 5.0f;
-  if(targetSpeedPitch > controlState.targetSpeedPitch) controlState.targetSpeedPitch += 0.025f;
-  if(targetSpeedPitch < controlState.targetSpeedPitch) controlState.targetSpeedPitch -= 0.025f;
+  targetSpeedPitch *= inputDamp;
+  controlState.targetSpeedPitch = ramp(controlState.targetSpeedPitch, targetSpeedPitch, 0.025f);
   float speedDev = controlState.targetSpeedPitch - sensorData.wheelVel[0];
   controlState.targetPitchI -= speedDev * controlPara.iPartSpeedPitch / 500.0f;
   controlState.speedPitchFilt = PT1(sensorData.wheelVel[0], controlState.speedPitchFilt, controlPara.speedPitchFilter);
   speedDev = controlState.targetSpeedPitch - controlState.speedPitchFilt;
   controlState.targetPitch = controlState.targetPitchI - speedDev * controlPara.pPartSpeedPitch;
   float pitchDev = controlPara.pitchWP + controlState.targetPitch - sensorData.pitchAngle;
-  actuator.torque[0] = pitchDev * controlPara.pPartPitch - sensorData.gyroFilt.z * controlPara.dPartPitch;
-  if(input.c) actuator.torque[0] = pitchDev * 1.0f - sensorData.gyroFilt.z * controlPara.dPartPitch;
+  actuator.torque[0] = pitchDev * effectivePPitch - sensorData.gyroFilt.z * controlPara.dPartPitch;
   if(fabs(sensorData.rollAngle) < 10.0f && fabs(actuator.torque[0]) < 2.0f) controlState.activePitch = true;
 
   controlState.targetSpeedRoll = 0;
@@ -57,9 +71,20 @@ void loopControl()
   actuator.torque[2] = -targetTorqueRoll;
   if(controlState.activePitch && fabs(targetTorqueRoll) < 1.0f) controlState.activeRoll = true;
 
-  float targetYawTorque = (sensorData.gyro.x - input.b) * controlPara.dPartYaw;
+  static float targetYawRamped = 0.0f;
+  float targetYaw = 0.0f;
+  if(joystickTimeout) targetYaw -= joystickReport.z - 127;
+  targetYaw += input.b;
+  targetYaw *= inputDamp;
+  targetYawRamped = ramp(targetYawRamped, targetYaw, 5.0f);
+  float targetYawTorque = (sensorData.gyro.x - targetYaw) * controlPara.dPartYaw;
   actuator.torque[1] += targetYawTorque;
   actuator.torque[2] += targetYawTorque;
+
+  if(BUTTON(4))
+  {
+    controlState.activePitch = false;
+  }
 
   if (fabs(sensorData.pitchAngle) > 20.0f || fabs(sensorData.rollAngle) > 20.0f)
   {
@@ -67,19 +92,19 @@ void loopControl()
     controlState.activeRoll = false;
   }
 
-  if (!controlState.activePitch) controlState.targetPitchI = 0.0f;
+  if (!controlState.activePitch || BUTTON(3)) controlState.targetPitchI = 0.0f;
   if (!controlState.activeRoll) controlState.targetRollI = 0.0f;
 
   for (int i = 0; i < 3; i++) actuator.torque[i] = LIMIT(actuator.torque[i], -40.0f, 40.0f);
 
-  if (!actuator.disabled && (controlState.activePitch || input.c))
+  if (!actuator.disabled && (controlState.activePitch || input.c || BUTTON(3)))
   {
     sendTorque(0, actuator.torque[0]);
   } else {
     sendTorque(0, 0);
   }
 
-  if (!actuator.disabled && (controlState.activeRoll || input.c))
+  if (!actuator.disabled && (controlState.activeRoll || input.c || BUTTON(3)))
   {
     sendTorque(1, actuator.torque[1]);
     sendTorque(2, actuator.torque[2]);

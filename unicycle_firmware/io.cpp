@@ -45,10 +45,7 @@ void loopInputOutput()
   {
     if(measurementOut && wifiOn)
     {
-      /*
-      sensorData.taskTime[0][ttavg] = sensorData.taskTime[0][ttsum] / sensorData.taskTime[0][ttnum];
-      sensorData.taskTime[1][ttavg] = sensorData.taskTime[1][ttsum] / sensorData.taskTime[1][ttnum];
-      */
+      sensorData.taskTime[ttavg] = sensorData.taskTime[ttsum] / sensorData.taskTime[ttnum];
       uint8_t c;
       for(c = 0; c < 5; c++)
       {
@@ -69,17 +66,10 @@ void loopInputOutput()
       udp.write((uint8_t *)&dataout, sizeof(dataout));
       udp.endPacket();
     }
-    //Serial.println(sensorData.taskTime[1][ttmax]);
-    /*
-    sensorData.taskTime[0][ttmin] = 65000;
-    sensorData.taskTime[0][ttmax] = 0;
-    sensorData.taskTime[0][ttsum] = 0;
-    sensorData.taskTime[0][ttnum] = 0;
-    sensorData.taskTime[1][ttmin] = 65000;
-    sensorData.taskTime[1][ttmax] = 0;
-    sensorData.taskTime[1][ttsum] = 0;
-    sensorData.taskTime[1][ttnum] = 0;
-    */
+    sensorData.taskTime[ttmin] = 65000;
+    sensorData.taskTime[ttmax] = 0;
+    sensorData.taskTime[ttsum] = 0;
+    sensorData.taskTime[ttnum] = 0;
   }
 
 

@@ -8,6 +8,7 @@
 CParameter::CParameter(CTool* pTool)
 {
     m_pTool = pTool;
+    m_iIndex = 0;
 }
 
 CParameter::~CParameter(void)

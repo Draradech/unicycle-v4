@@ -26,7 +26,7 @@ void setupCan()
 
 void loopCan()
 {
-  if(ESP32Can.readFrame(rxFrame, 0))
+  while(ESP32Can.readFrame(rxFrame, 0))
   {
     uint8_t cmd = rxFrame.identifier & 0x1f;
     uint8_t axis = (rxFrame.identifier >> 5) - 1;

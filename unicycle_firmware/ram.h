@@ -4,6 +4,16 @@
 #define globl extern
 #endif
 
+enum tt
+{
+  ttmin,
+  ttmax,
+  ttsum,
+  ttnum,
+  ttavg,
+  tt_size
+};
+
 enum charge
 {
   chg_normal,
@@ -34,6 +44,7 @@ typedef struct
   float wheelVel[3];
   float iBus[3];
   float voltage;
+  uint16_t taskTime[tt_size];
   uint8_t chargeState;
 } SSensorData;
 

@@ -16,6 +16,8 @@
 #define BUTTON(x) ((joystickReport.buttons & (1 << (x))) >> (x))
 #define fsign(x) ((x) > 0 ? 1 : -1)
 
+void loop2ms();
+
 void setupWifi();
 void setupOta();
 void setupSensors();
@@ -24,6 +26,7 @@ void setupUI();
 void setupInputOutput();
 void setupBLE();
 void setupCan();
+void setupSystem();
 
 void loopOta();
 void loopSensors();
