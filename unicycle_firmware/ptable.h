@@ -19,6 +19,6 @@ ENTRY('z',  controlPara.gyroOffset.z,    0.01,  "deg/s",    "gyro offset z"     
 ENTRY('u',  controlPara.gyroFilter.x,     1.0,     "ms",    "gyro filter x"                   )
 ENTRY('i',  controlPara.gyroFilter.y,     1.0,     "ms",    "gyro filter y"                   )
 ENTRY('o',  controlPara.gyroFilter.z,     1.0,     "ms",    "gyro filter z"                   )
-ENTRY('p',  controlState.activePitch,     1.0,       "",    "pitch controller active"         )
+ENTRY('a',  controlPara.curveRoll,       0.01,       "",    "curve roll"                      )
 
 ENTRY(  0,  controlPara.dPartPitch,      0.01,       "",    "end of table"                    )

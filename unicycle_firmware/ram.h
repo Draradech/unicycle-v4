@@ -73,6 +73,7 @@ typedef struct
   float dPartYaw;
   float rollOffset;
   float pitchOffset;
+  float curveRoll;
 } SControlPara;
 
 typedef struct

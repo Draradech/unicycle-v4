@@ -14,12 +14,12 @@ void setupSensors()
   analogSetAttenuation(ADC_11db);
   gIMU.init();
   gIMU.initMagnetometer();
-  gIMU.setAccDLPF(ICM20948_DLPF_7);
+  gIMU.setAccDLPF(ICM20948_DLPF_3);
   gIMU.setAccSampleRateDivider(0);
-  gIMU.setGyrDLPF(ICM20948_DLPF_7);
+  gIMU.setGyrDLPF(ICM20948_DLPF_1);
   gIMU.setGyrSampleRateDivider(0);
   gIMU.setGyrRange(ICM20948_GYRO_RANGE_500);
-  gIMU.setTempDLPF(ICM20948_DLPF_6);
+  gIMU.setTempDLPF(ICM20948_DLPF_3);
   controlPara.gyroOffset.z = -0.28f;
   controlPara.gyroOffset.y = -0.54f;
   controlPara.pitchOffset = 1.35f;
@@ -36,9 +36,9 @@ void loopSensors()
   gIMU.getGyrValues(&sensorData.gyro);
   gIMU.getMagValues(&sensorData.magnet);
   float pitchAcc = atan2(sensorData.acc.y, sensorData.acc.x) * 180.0f / 3.1416f + controlPara.pitchOffset;
-  sensorData.pitchAngleAcc = PT1(pitchAcc, sensorData.pitchAngleAcc, 200);
+  sensorData.pitchAngleAcc = PT1(pitchAcc, sensorData.pitchAngleAcc, 150);
   float rollAcc = atan2(sensorData.acc.z, sensorData.acc.x) * 180.0f / 3.1416f + controlPara.rollOffset;
-  sensorData.rollAngleAcc = PT1(rollAcc, sensorData.rollAngleAcc, 200);
+  sensorData.rollAngleAcc = PT1(rollAcc, sensorData.rollAngleAcc, 150);
   sensorData.pitchAngle -= (sensorData.gyro.z + controlPara.gyroOffset.z) * LOOP_S;
   sensorData.rollAngle += (sensorData.gyro.y + controlPara.gyroOffset.y) * LOOP_S;
   sensorData.pitchAngle = PT1(sensorData.pitchAngleAcc, sensorData.pitchAngle, 3000);
